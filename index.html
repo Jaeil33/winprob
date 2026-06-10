@@ -22,10 +22,11 @@ body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',system-ui
 .ball:before{left:2px;border-right:none}.ball:after{right:2px;border-left:none}
 .brand small{font-weight:500;font-size:13px;color:#94a3b8;margin-left:2px}
 .menu{display:flex;gap:30px;font-size:15px;color:#a0acbe}
-.menu a{color:inherit;text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
+.menu a{color:inherit;text-decoration:none;padding:4px 0;border-bottom:2px solid transparent;cursor:pointer}
 .menu a.active{color:#fff;border-color:var(--pri)}
-.user{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:15px;color:#d2d9e4}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:15px;color:#d2d9e4;cursor:pointer}
 .avatar{width:34px;height:34px;border-radius:50%;background:var(--pri);display:grid;place-items:center;font-weight:700;color:#fff;font-size:14px}
+.view{display:none}.view.active{display:block}
 .wrap{max-width:1560px;margin:0 auto;padding:26px 32px 50px}
 .head{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:22px}
 .head h1{font-size:30px;font-weight:800}
@@ -38,11 +39,38 @@ body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',system-ui
 .card h3{font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .tag{width:9px;height:26px;border-radius:5px;display:inline-block}
 .row{display:grid;gap:18px}
+.kpi{grid-template-columns:repeat(4,1fr)}
 .r4{grid-template-columns:repeat(4,1fr)}
 .r2{grid-template-columns:1.6fr 1fr}
-@media(max-width:1300px){.r4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:1300px){.r4{grid-template-columns:repeat(2,1fr)}.kpi{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:1100px){.grid{grid-template-columns:1fr}.r2{grid-template-columns:1fr}}
-@media(max-width:680px){.r4{grid-template-columns:1fr}}
+@media(max-width:680px){.r4{grid-template-columns:1fr}.kpi{grid-template-columns:1fr}}
+.kpic .num{font-size:32px;font-weight:800;line-height:1}
+.kpic .lbl{color:var(--grey);font-size:14px;margin-top:8px}
+.kpic .ic{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;font-size:20px;margin-bottom:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{color:var(--grey);font-weight:700;font-size:13px}
+#dataTable th[data-k]{cursor:pointer;user-select:none}
+#dataTable th[data-k]:hover{color:var(--pri)}
+.tbl td.rk{font-weight:800;color:var(--pri);width:36px}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.cta .btn{background:var(--pri);color:#fff;border:none;border-radius:13px;padding:14px 26px;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.code{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:16px 18px;font-family:'D2Coding',Consolas,monospace;font-size:13px;overflow:auto;white-space:pre;line-height:1.55;margin-top:10px}
+.code .k{color:#7dd3fc}.code .s{color:#86efac}.code .n{color:#fca5a5}
+.method{font-weight:800;padding:3px 11px;border-radius:6px;color:#fff;font-size:13px}
+.post{background:var(--pos)}.get{background:var(--a)}
+.endpoint{border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.endpoint .path{font-family:Consolas,monospace;font-weight:700;margin-left:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chips span{background:var(--pri-l);color:var(--pri);padding:6px 13px;border-radius:20px;font-weight:700;font-size:13px}
+.prof{display:flex;align-items:center;gap:18px;margin-bottom:8px}
+.prof .ava{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#2563eb);display:grid;place-items:center;color:#fff;font-weight:800;font-size:30px}
+.prof .nm{font-size:24px;font-weight:800}
+.prof .rl{color:var(--grey);font-size:14px;margin-top:2px}
+.linkrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line)}
+.linkrow:last-child{border:none}
+.linkrow a,.linkrow button{color:var(--pri);font-weight:700;text-decoration:none;background:none;border:none;font:inherit;cursor:pointer}
 .sub{font-size:12px;font-weight:800;letter-spacing:.03em;color:var(--pri);margin:20px 0 12px;padding-top:16px;border-top:1px dashed var(--line)}
 .teamsel{display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .chip{flex:1;display:flex;align-items:center;gap:9px;border-radius:13px;padding:11px 12px;font-weight:700;border:2px solid}
@@ -111,33 +139,53 @@ canvas{max-width:100%}
 </head>
 <body>
 <nav class="nav">
-  <div class="brand"><span class="ball"></span>WinProb <small>by NAVER Cloud</small></div>
-  <div class="menu"><a>대시보드</a><a class="active">시뮬레이터</a><a>데이터</a><a>API 문서</a></div>
-  <div class="user"><span class="avatar">재</span>김재일 ▾</div>
+  <div class="brand" data-view="dashboard"><span class="ball"></span>WinProb <small>by NAVER Cloud</small></div>
+  <div class="menu">
+    <a data-view="dashboard">대시보드</a>
+    <a data-view="simulator">시뮬레이터</a>
+    <a data-view="data">데이터</a>
+    <a data-view="api">API 문서</a>
+  </div>
+  <div class="user" data-view="profile"><span class="avatar">재</span>김재일 ▾</div>
 </nav>
 
-<div class="wrap">
+<!-- ================= 대시보드 ================= -->
+<section class="view" id="view-dashboard"><div class="wrap">
+  <div class="head"><h1>대시보드</h1><div class="badge"><span class="dot"></span>실시간 분석</div><p id="kpiUpdated">KBO 팀 데이터 기준</p></div>
+  <div class="row kpi">
+    <div class="card kpic"><div class="ic" style="background:var(--pri-l);color:var(--pri)">⚾</div><div class="num">10팀</div><div class="lbl">분석 대상 KBO 구단</div></div>
+    <div class="card kpic"><div class="ic" style="background:var(--a-l);color:var(--a)">🎯</div><div class="num">56.0%</div><div class="lbl">모델 예측 정확도 (Test)</div></div>
+    <div class="card kpic"><div class="ic" style="background:#dcfce7;color:var(--pos)">📉</div><div class="num">0.662</div><div class="lbl">로그손실 (기준선 0.693)</div></div>
+    <div class="card kpic"><div class="ic" style="background:#fef3c7;color:var(--amber)">⚡</div><div class="num">2,500</div><div class="lbl">1회 실행당 시뮬레이션</div></div>
+  </div>
+  <div class="row r2" style="margin-top:18px">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--pri)"></span>KBO 팀 전력 순위</h3>
+      <table class="tbl"><thead><tr><th>#</th><th>팀</th><th>OBP</th><th>WHIP</th><th>전력지수</th></tr></thead><tbody id="leadBody"></tbody></table>
+      <p class="muted" style="margin-top:8px">전력지수 = (출루율 기여) + (투수력 기여) · 높을수록 강팀</p>
+    </div>
+    <div class="card"><h3><span class="tag" style="background:var(--a)"></span>전력 지수 비교</h3><canvas id="dashChart" height="280"></canvas></div>
+  </div>
+  <div class="card cta" style="margin-top:18px">
+    <div><div style="font-size:19px;font-weight:800">지금 바로 승률을 시뮬레이션해 보세요</div><div class="muted" style="margin-top:4px">현재 경기 상황과 변수를 입력하면 실시간으로 승률을 계산합니다</div></div>
+    <button class="btn" data-view="simulator">시뮬레이터 열기 →</button>
+  </div>
+</div></section>
+
+<!-- ================= 시뮬레이터 ================= -->
+<section class="view" id="view-simulator"><div class="wrap">
   <div class="head">
     <h1>경기 승률 시뮬레이터</h1>
     <div class="badge"><span class="dot"></span>실시간 분석</div>
     <p>현재 경기 상황(스코어·이닝·아웃·주자)과 타자·투수 변수를 입력하면, 그 상황에서 남은 경기를 몬테카를로로 시뮬레이션해 실시간 승률을 계산합니다.</p>
   </div>
-
   <div class="grid">
-    <!-- ============ CONTROL PANEL ============ -->
     <aside class="card">
       <h3><span class="tag" style="background:var(--pri)"></span>경기 설정</h3>
-
-      <!-- 데이터 불러오기 (상단) -->
       <div class="field" style="margin-top:0">
         <label>KBO 팀 데이터 불러오기 <span class="muted" id="dataInfo">내장 데이터</span></label>
-        <div style="display:flex;gap:8px">
-          <select id="loadA" class="sel a"></select>
-          <select id="loadB" class="sel b"></select>
-        </div>
+        <div style="display:flex;gap:8px"><select id="loadA" class="sel a"></select><select id="loadB" class="sel b"></select></div>
       </div>
-
-      <!-- 팀 (직접 입력 가능) -->
       <div class="teamsel">
         <label class="chip a"><span class="b"></span><input id="nameA" value="두산"></label>
         <span class="vs">VS</span>
@@ -145,144 +193,152 @@ canvas{max-width:100%}
       </div>
       <div class="muted">팀명을 직접 입력 후 Enter — KBO 팀명이면 성적까지 자동 적용됩니다</div>
 
-      <!-- 현재 경기 상황 -->
       <div class="sub">현재 경기 상황</div>
-      <div class="field" style="margin-top:0">
-        <label>이닝</label>
+      <div class="field" style="margin-top:0"><label>이닝</label>
         <div style="display:flex;gap:8px;align-items:center">
-          <select id="inn" class="sel" style="max-width:108px">
-            <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-            <option>6</option><option>7</option><option>8</option><option>9</option>
-            <option>10</option><option>11</option><option>12</option>
-          </select>
+          <select id="inn" class="sel" style="max-width:108px"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option><option>12</option></select>
           <div class="seg" id="half" style="flex:1"><button data-v="top" class="on">초 (A공격)</button><button data-v="bottom">말 (B공격)</button></div>
         </div>
       </div>
-      <div class="field"><label>아웃 카운트</label>
-        <div class="seg" id="outs"><button data-v="0" class="on">0아웃</button><button data-v="1">1아웃</button><button data-v="2">2아웃</button></div>
-      </div>
-      <div class="field"><label>주자 상황</label>
-        <div class="bases" id="bases"><button data-b="1">1루</button><button data-b="2">2루</button><button data-b="3">3루</button></div>
-      </div>
+      <div class="field"><label>아웃 카운트</label><div class="seg" id="outs"><button data-v="0" class="on">0아웃</button><button data-v="1">1아웃</button><button data-v="2">2아웃</button></div></div>
+      <div class="field"><label>주자 상황</label><div class="bases" id="bases"><button data-b="1">1루</button><button data-b="2">2루</button><button data-b="3">3루</button></div></div>
       <div class="field"><label>현재 스코어</label>
-        <div class="scorein">
-          <span class="ta">원정 A</span>
-          <input id="scoreA" type="number" min="0" value="0" class="numin a">
-          <span class="c">:</span>
-          <input id="scoreB" type="number" min="0" value="0" class="numin b">
-          <span class="tb">홈 B</span>
-        </div>
+        <div class="scorein"><span class="ta">원정 A</span><input id="scoreA" type="number" min="0" value="0" class="numin a"><span class="c">:</span><input id="scoreB" type="number" min="0" value="0" class="numin b"><span class="tb">홈 B</span></div>
       </div>
 
-      <!-- 필수 변수 -->
       <div class="sub">필수 경기 변수</div>
-      <div class="field" style="margin-top:0"><label>타자 유형 — A팀 (좌/우)</label>
-        <div class="seg a" id="hand"><button data-v="L">좌타</button><button data-v="R" class="on">우타</button><button data-v="S">스위치</button></div>
-      </div>
-      <div class="field"><label>투수 투구폼 — B팀</label>
-        <div class="seg" id="form"><button data-v="over">오버핸드</button><button data-v="three" class="on">스리쿼터</button><button data-v="side">사이드암</button><button data-v="under">언더핸드</button></div>
-      </div>
-      <div class="field"><label>직구 구사율 — B팀 투수 <span class="muted" id="fbLbl">45%</span></label>
-        <div class="slider"><input id="fastball" type="range" min="30" max="60" value="45"></div>
-        <div class="mixbar" id="mixbar"></div>
-      </div>
-      <div class="field"><label>A팀 공격 — 출루율(OBP)</label>
-        <div class="slider a"><input id="aObp" type="range" min="280" max="400" value="355"><span class="val" id="aObpV">.355</span></div>
-      </div>
-      <div class="field"><label>B팀 투수 — WHIP <span class="muted">낮을수록 우수</span></label>
-        <div class="slider b"><input id="bWhip" type="range" min="100" max="170" value="130"><span class="val" id="bWhipV">1.30</span></div>
-      </div>
-      <div class="field"><label>B팀 공격 — 출루율(OBP)</label>
-        <div class="slider b"><input id="bObp" type="range" min="280" max="400" value="360"><span class="val" id="bObpV">.360</span></div>
-      </div>
-      <div class="field"><label>A팀 투수 — WHIP <span class="muted">낮을수록 우수</span></label>
-        <div class="slider a"><input id="aWhip" type="range" min="100" max="170" value="138"><span class="val" id="aWhipV">1.38</span></div>
-      </div>
+      <div class="field" style="margin-top:0"><label>타자 유형 — A팀 (좌/우)</label><div class="seg a" id="hand"><button data-v="L">좌타</button><button data-v="R" class="on">우타</button><button data-v="S">스위치</button></div></div>
+      <div class="field"><label>투수 투구폼 — B팀</label><div class="seg" id="form"><button data-v="over">오버핸드</button><button data-v="three" class="on">스리쿼터</button><button data-v="side">사이드암</button><button data-v="under">언더핸드</button></div></div>
+      <div class="field"><label>직구 구사율 — B팀 투수 <span class="muted" id="fbLbl">45%</span></label><div class="slider"><input id="fastball" type="range" min="30" max="60" value="45"></div><div class="mixbar" id="mixbar"></div></div>
+      <div class="field"><label>A팀 공격 — 출루율(OBP)</label><div class="slider a"><input id="aObp" type="range" min="280" max="400" value="355"><span class="val" id="aObpV">.355</span></div></div>
+      <div class="field"><label>B팀 투수 — WHIP <span class="muted">낮을수록 우수</span></label><div class="slider b"><input id="bWhip" type="range" min="100" max="170" value="130"><span class="val" id="bWhipV">1.30</span></div></div>
+      <div class="field"><label>B팀 공격 — 출루율(OBP)</label><div class="slider b"><input id="bObp" type="range" min="280" max="400" value="360"><span class="val" id="bObpV">.360</span></div></div>
+      <div class="field"><label>A팀 투수 — WHIP <span class="muted">낮을수록 우수</span></label><div class="slider a"><input id="aWhip" type="range" min="100" max="170" value="138"><span class="val" id="aWhipV">1.38</span></div></div>
 
-      <!-- 선호 변수 -->
       <div class="sub">사용자 선호 변수 <span class="muted" style="font-weight:600;text-transform:none;letter-spacing:0">흥미 요소 · 결과에 살짝 반영</span></div>
-      <div class="field" style="margin-top:0"><label>날씨</label>
-        <div class="seg" id="weather"><button data-v="clear" class="on">맑음 ☀️</button><button data-v="cloud">흐림 ☁️</button><button data-v="rain">비 🌧️</button></div>
-      </div>
-      <div class="field"><label>습도 <span class="muted" id="humidityV">50%</span></label>
-        <div class="slider"><input id="humidity" type="range" min="0" max="100" value="50"></div>
-      </div>
-      <div class="field"><label>타자 컨디션</label>
-        <div class="seg" id="cond"><button data-v="good">좋음 😀</button><button data-v="normal" class="on">보통 😐</button><button data-v="bad">나쁨 😣</button></div>
-      </div>
-      <div class="field"><label>홈 관중 열기 <span class="muted" id="crowdV">50%</span></label>
-        <div class="slider"><input id="crowd" type="range" min="0" max="100" value="50"></div>
-      </div>
-      <div class="field"><label>바람</label>
-        <div class="seg" id="wind"><button data-v="none" class="on">무풍</button><button data-v="out">외야쪽</button><button data-v="in">내야쪽</button></div>
-      </div>
+      <div class="field" style="margin-top:0"><label>날씨</label><div class="seg" id="weather"><button data-v="clear" class="on">맑음 ☀️</button><button data-v="cloud">흐림 ☁️</button><button data-v="rain">비 🌧️</button></div></div>
+      <div class="field"><label>습도 <span class="muted" id="humidityV">50%</span></label><div class="slider"><input id="humidity" type="range" min="0" max="100" value="50"></div></div>
+      <div class="field"><label>타자 컨디션</label><div class="seg" id="cond"><button data-v="good">좋음 😀</button><button data-v="normal" class="on">보통 😐</button><button data-v="bad">나쁨 😣</button></div></div>
+      <div class="field"><label>홈 관중 열기 <span class="muted" id="crowdV">50%</span></label><div class="slider"><input id="crowd" type="range" min="0" max="100" value="50"></div></div>
+      <div class="field"><label>바람</label><div class="seg" id="wind"><button data-v="none" class="on">무풍</button><button data-v="out">외야쪽</button><button data-v="in">내야쪽</button></div></div>
 
       <button class="run" id="run">▶  시뮬레이션 실행</button>
     </aside>
 
-    <!-- ============ RESULTS ============ -->
     <section class="row" style="grid-template-columns:1fr">
       <div class="row r4">
         <div class="card">
           <h3><span class="tag" style="background:var(--a)"></span>승리 확률</h3>
-          <div class="donutWrap"><canvas id="donut"></canvas>
-            <div class="donutCtr"><div><div class="big" id="winBig">--%</div><small id="winSub">-</small></div></div>
-          </div>
+          <div class="donutWrap"><canvas id="donut"></canvas><div class="donutCtr"><div><div class="big" id="winBig">--%</div><small id="winSub">-</small></div></div></div>
           <div class="legend"><span class="la" id="legA">● A</span><span class="lb" id="legB">● B</span></div>
         </div>
-        <div class="card">
-          <h3><span class="tag" style="background:var(--teal)"></span>현재 타석 예측</h3>
-          <div class="abWho" id="abWho">-</div>
-          <div id="abBars"></div>
-        </div>
-        <div class="card">
-          <h3><span class="tag" style="background:var(--pri)"></span>예상 최종 스코어</h3>
-          <div class="score">
-            <div class="now" id="scoreNow">현재 0:0</div>
-            <div class="nums"><span class="a" id="scoreA2">-</span><span class="c">:</span><span class="b" id="scoreB2">-</span></div>
-            <div class="muted" style="margin-top:4px">시뮬레이션 평균 최종 득점</div>
-            <div class="pill" id="scorePill">-</div>
-          </div>
-        </div>
-        <div class="card">
-          <h3><span class="tag" style="background:var(--amber)"></span>핵심 지표 비교</h3>
-          <div id="mets"></div>
-        </div>
+        <div class="card"><h3><span class="tag" style="background:var(--teal)"></span>현재 타석 예측</h3><div class="abWho" id="abWho">-</div><div id="abBars"></div></div>
+        <div class="card"><h3><span class="tag" style="background:var(--pri)"></span>예상 최종 스코어</h3><div class="score"><div class="now" id="scoreNow">현재 0:0</div><div class="nums"><span class="a" id="scoreA2">-</span><span class="c">:</span><span class="b" id="scoreB2">-</span></div><div class="muted" style="margin-top:4px">시뮬레이션 평균 최종 득점</div><div class="pill" id="scorePill">-</div></div></div>
+        <div class="card"><h3><span class="tag" style="background:var(--amber)"></span>핵심 지표 비교</h3><div id="mets"></div></div>
       </div>
-
       <div class="row r2">
-        <div class="card">
-          <h3><span class="tag" style="background:var(--a)"></span>이닝별 승리 확률 추이</h3>
-          <canvas id="inning" height="150"></canvas>
-        </div>
-        <div class="card">
-          <h3><span class="tag" style="background:var(--b)"></span>투구 로케이션</h3>
-          <div class="zone" id="zone"></div>
-          <div class="muted" style="text-align:center;margin-top:8px">진한 영역일수록 피안타 집중</div>
-        </div>
+        <div class="card"><h3><span class="tag" style="background:var(--a)"></span>이닝별 승리 확률 추이</h3><canvas id="inning" height="150"></canvas></div>
+        <div class="card"><h3><span class="tag" style="background:var(--b)"></span>투구 로케이션</h3><div class="zone" id="zone"></div><div class="muted" style="text-align:center;margin-top:8px">진한 영역일수록 피안타 집중</div></div>
       </div>
-
       <div class="row r2">
-        <div class="card">
-          <h3><span class="tag" style="background:var(--purple)"></span>최종 득점차 분포</h3>
-          <canvas id="hist" height="150"></canvas>
-          <div class="muted" style="margin-top:6px">주황 기준선(0점) 오른쪽일수록 A팀 승리</div>
-        </div>
-        <div class="card aiCard">
-          <h3>AI 추천 결과</h3>
-          <div class="win" id="aiWin">-</div>
-          <div class="subt">이 상황에서의 승리 예상</div>
-          <div style="margin-top:14px">
-            <div class="aiMet"><span>승리 확률</span><b id="aiWp" style="color:var(--pos)">-</b></div>
-            <div class="aiMet"><span>기대 최종 득점차</span><b id="aiDiff" style="color:var(--sky)">-</b></div>
-            <div class="aiMet"><span>현재 타석 출루확률</span><b id="aiP" style="color:var(--amber)">-</b></div>
-          </div>
-          <div class="muted" style="color:#8294ad;margin-top:14px">클라우드 기반 실시간 추론 엔진 · 데모</div>
-        </div>
+        <div class="card"><h3><span class="tag" style="background:var(--purple)"></span>최종 득점차 분포</h3><canvas id="hist" height="150"></canvas><div class="muted" style="margin-top:6px">주황 기준선(0점) 오른쪽일수록 A팀 승리</div></div>
+        <div class="card aiCard"><h3>AI 추천 결과</h3><div class="win" id="aiWin">-</div><div class="subt">이 상황에서의 승리 예상</div><div style="margin-top:14px"><div class="aiMet"><span>승리 확률</span><b id="aiWp" style="color:var(--pos)">-</b></div><div class="aiMet"><span>기대 최종 득점차</span><b id="aiDiff" style="color:var(--sky)">-</b></div><div class="aiMet"><span>현재 타석 출루확률</span><b id="aiP" style="color:var(--amber)">-</b></div></div><div class="muted" style="color:#8294ad;margin-top:14px">클라우드 기반 실시간 추론 엔진 · 데모</div></div>
       </div>
     </section>
   </div>
-</div>
+</div></section>
+
+<!-- ================= 데이터 ================= -->
+<section class="view" id="view-data"><div class="wrap">
+  <div class="head"><h1>데이터</h1><div class="badge"><span class="dot"></span>KBO</div><p id="dataUpdated">KBO 팀 데이터</p></div>
+  <div class="row r2">
+    <div class="card">
+      <h3><span class="tag" style="background:var(--pri)"></span>KBO 팀 데이터</h3>
+      <table id="dataTable" class="tbl"><thead><tr><th data-k="name">팀 ⇅</th><th data-k="obp">OBP ⇅</th><th data-k="whip">WHIP ⇅</th><th data-k="pw">전력지수 ⇅</th></tr></thead><tbody id="dataBody"></tbody></table>
+      <p class="muted" style="margin-top:8px">헤더를 클릭하면 정렬됩니다 · 데이터는 data.json에서 불러옵니다</p>
+    </div>
+    <div class="card"><h3><span class="tag" style="background:var(--a)"></span>출루율 vs WHIP 분포</h3><canvas id="dataChart" height="320"></canvas><p class="muted" style="margin-top:6px">오른쪽 위(높은 OBP·낮은 WHIP)일수록 강팀</p></div>
+  </div>
+</div></section>
+
+<!-- ================= API 문서 ================= -->
+<section class="view" id="view-api"><div class="wrap">
+  <div class="head"><h1>API 문서</h1><div class="badge">v1</div><p>WinProb REST API — 상황 기반 승률 예측을 어디서든 호출하세요. (데모 명세)</p></div>
+  <div class="card" style="margin-bottom:18px">
+    <h3><span class="tag" style="background:var(--pri)"></span>개요 &amp; 인증</h3>
+    <p class="muted" style="margin-bottom:8px">Base URL: <b style="color:var(--ink);font-family:Consolas,monospace">https://api.winprob.ncloud.app</b> · 모든 요청은 API Key 헤더가 필요합니다.</p>
+    <div class="code"><span class="n">Authorization</span>: Bearer <span class="s">YOUR_API_KEY</span>
+<span class="n">Content-Type</span>: application/json</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="tag" style="background:var(--pos)"></span>엔드포인트</h3>
+
+    <div class="endpoint">
+      <div><span class="method post">POST</span><span class="path">/v1/winprob</span></div>
+      <p class="muted" style="margin:8px 0">현재 경기 상황과 팀 변수로 승리 확률을 계산합니다.</p>
+      <div class="code"><span class="k">// Request</span>
+{
+  <span class="n">"home"</span>: { <span class="n">"obp"</span>: <span class="s">0.360</span>, <span class="n">"whip"</span>: <span class="s">1.30</span> },
+  <span class="n">"away"</span>: { <span class="n">"obp"</span>: <span class="s">0.355</span>, <span class="n">"whip"</span>: <span class="s">1.38</span> },
+  <span class="n">"situation"</span>: { <span class="n">"inning"</span>: <span class="s">9</span>, <span class="n">"half"</span>: <span class="s">"bottom"</span>, <span class="n">"outs"</span>: <span class="s">2</span>,
+                  <span class="n">"bases"</span>: [<span class="s">1</span>,<span class="s">0</span>,<span class="s">1</span>], <span class="n">"score"</span>: { <span class="n">"away"</span>: <span class="s">3</span>, <span class="n">"home"</span>: <span class="s">2</span> } },
+  <span class="n">"options"</span>: { <span class="n">"iterations"</span>: <span class="s">5000</span> }
+}</div>
+      <div class="code"><span class="k">// 200 OK</span>
+{
+  <span class="n">"win_prob"</span>: { <span class="n">"away"</span>: <span class="s">0.612</span>, <span class="n">"home"</span>: <span class="s">0.388</span> },
+  <span class="n">"expected_score"</span>: { <span class="n">"away"</span>: <span class="s">3.4</span>, <span class="n">"home"</span>: <span class="s">3.1</span> },
+  <span class="n">"at_bat"</span>: { <span class="n">"on_base"</span>: <span class="s">0.318</span>, <span class="n">"hit"</span>: <span class="s">0.214</span>, <span class="n">"walk"</span>: <span class="s">0.095</span> }
+}</div>
+    </div>
+
+    <div class="endpoint">
+      <div><span class="method get">GET</span><span class="path">/v1/teams</span></div>
+      <p class="muted" style="margin:8px 0">분석 가능한 KBO 팀 목록과 시즌 성적을 반환합니다.</p>
+      <div class="code"><span class="k">// 200 OK</span>
+[ { <span class="n">"code"</span>: <span class="s">"OB"</span>, <span class="n">"name"</span>: <span class="s">"두산"</span>, <span class="n">"obp"</span>: <span class="s">0.355</span>, <span class="n">"whip"</span>: <span class="s">1.38</span> }, ... ]</div>
+    </div>
+
+    <div class="endpoint">
+      <div><span class="method get">GET</span><span class="path">/v1/teams/{code}</span></div>
+      <p class="muted" style="margin:8px 0">특정 팀의 상세 성적을 반환합니다. 예: <b style="font-family:Consolas,monospace">/v1/teams/LG</b></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px">
+    <h3><span class="tag" style="background:var(--amber)"></span>요금제</h3>
+    <table class="tbl"><thead><tr><th>플랜</th><th>호출 한도</th><th>대상</th><th>가격</th></tr></thead>
+    <tbody>
+      <tr><td><b>Free</b></td><td>1,000 / 일</td><td>개인·학습</td><td>무료</td></tr>
+      <tr><td><b style="color:var(--pri)">Pro</b></td><td>100,000 / 일</td><td>미디어·콘텐츠</td><td>월 구독</td></tr>
+      <tr><td><b style="color:var(--purple)">Enterprise</b></td><td>무제한 · SLA</td><td>구단·기업</td><td>문의</td></tr>
+    </tbody></table>
+    <p class="muted" style="margin-top:8px">※ 비즈니스 모델의 B2B API·구독(SaaS) 구상을 반영한 데모 명세입니다.</p>
+  </div>
+</div></section>
+
+<!-- ================= 프로필 ================= -->
+<section class="view" id="view-profile"><div class="wrap">
+  <div class="head"><h1>프로필</h1></div>
+  <div class="row r2">
+    <div class="card">
+      <div class="prof"><div class="ava">재</div><div><div class="nm">김재일</div><div class="rl">데이터 분석 · 트윈스 팀장 · 네이버클라우드 지원자</div></div></div>
+      <p class="muted" style="margin:14px 0">"기술은 사용자의 이해를 돕고 사회적 가치와 연결될 때 비로소 더 큰 의미를 가진다"는 가치관으로, 복잡한 세이버메트릭스를 누구나 이해할 수 있는 형태로 전달하는 데이터 서비스를 만들고 있습니다.</p>
+      <div class="sub" style="border:none;padding:0;margin:14px 0 8px">기술 스택</div>
+      <div class="chips"><span>Python</span><span>NumPy</span><span>pandas</span><span>JavaScript</span><span>Chart.js</span><span>GitHub Actions</span><span>데이터 분석</span><span>클라우드</span></div>
+    </div>
+    <div class="card">
+      <h3><span class="tag" style="background:var(--pri)"></span>이 프로젝트</h3>
+      <p class="muted" style="margin-bottom:12px">세이버메트릭스 데이터 기반 야구 승률 시뮬레이터. odds-ratio 매치업 확률 → 이벤트 기반 몬테카를로 이닝 시뮬레이션 → 상황 기반 경기 승률의 3단계 알고리즘으로 구현했습니다.</p>
+      <div class="linkrow"><span>모델 정확도</span><b>56.0%</b></div>
+      <div class="linkrow"><span>로그손실 (기준선 0.693)</span><b style="color:var(--pos)">0.662</b></div>
+      <div class="linkrow"><span>GitHub 저장소</span><a href="https://github.com/Jaeil33/winprob" target="_blank">github.com/Jaeil33/winprob ↗</a></div>
+      <div class="linkrow"><span>라이브 시뮬레이터</span><button data-view="simulator">열기 →</button></div>
+    </div>
+  </div>
+</div></section>
+
 <div class="foot">
   WinProb 데모 · 승률 = 상황 기반 몬테카를로 시뮬레이션(odds-ratio 매치업 확률 → 이벤트 기반 이닝 시뮬레이션 → 남은 경기 승률). ⓒ 2026 트윈스 · 김재일
 </div>
@@ -290,6 +346,7 @@ canvas{max-width:100%}
 <script>
 const $=id=>document.getElementById(id);
 let KBO=[['두산',.355,1.38],['LG',.360,1.30],['KIA',.365,1.34],['삼성',.350,1.40],['SSG',.345,1.42],['롯데',.348,1.45],['한화',.352,1.36],['NC',.344,1.44],['KT',.346,1.41],['키움',.335,1.50]];
+let DATA_META={season:'2025',updated:'2025-10-01',source:'manual'};
 const LEAGUE_OBP=0.335,K=1.10;
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 const whipToObp=w=>w/(w+3);
@@ -354,8 +411,8 @@ function runSim(st,n){
   return{winp:(winA+tie*0.5)/n,meanA:sumA/n,meanB:sumB/n,diffs,inningWP,pA,pB,
     atbat:{who:st.half==='top'?'A':'B',onbase,walk,hit,out:1-onbase}};
 }
+function powerIndex(obp,whip){return Math.round((obp*1000-300)+(1.5-whip)*100);}
 
-/* ---------- state ---------- */
 const state={hand:'R',form:'three',fastball:45,aObp:.355,bWhip:1.30,bObp:.360,aWhip:1.38,
   inn:1,half:'top',outs:0,b1:0,b2:0,b3:0,scoreA:0,scoreB:0,
   weather:'clear',humidity:50,cond:'normal',crowd:50,wind:'none'};
@@ -432,8 +489,48 @@ function render(){
 }
 $('run').addEventListener('click',render);
 
-function boot(){const a=KBO[0][0],b=KBO[1][0];fillSel($('loadA'),a);fillSel($('loadB'),b);initCharts();drawMix();applyTeam('A',a);applyTeam('B',b);render();}
-async function loadData(){try{const res=await fetch('data.json',{cache:'no-store'});if(res.ok){const j=await res.json();if(j.teams&&j.teams.length){KBO=j.teams.map(t=>[t.name,+t.obp,+t.whip]);const info=$('dataInfo');if(info)info.textContent=(j.season?j.season+' · ':'')+'기준일 '+(j.updated||'-')+(j.source?' ('+j.source+')':'');}}}catch(e){}boot();}
+let dashChart,dataChart;
+function ranked(){return KBO.map(t=>({name:t[0],obp:t[1],whip:t[2],pw:powerIndex(t[1],t[2])})).sort((a,b)=>b.pw-a.pw);}
+const PALETTE=['#4f46e5','#2563eb','#0ea5e9','#0d9488','#10b981','#f59e0b','#f97316','#e11d48','#7c3aed','#64748b'];
+function buildDashboardOnce(){
+  if($('kpiUpdated'))$('kpiUpdated').textContent=DATA_META.season+' 시즌 · 기준일 '+DATA_META.updated;
+  const R=ranked();
+  $('leadBody').innerHTML=R.map((t,i)=>`<tr><td class="rk">${i+1}</td><td><b>${t.name}</b></td><td>${t.obp.toFixed(3).slice(1)}</td><td>${t.whip.toFixed(2)}</td><td><b style="color:${PALETTE[i%10]}">${t.pw}</b></td></tr>`).join('');
+  if(!dashChart){dashChart=new Chart($('dashChart'),{type:'bar',data:{labels:R.map(t=>t.name),datasets:[{data:R.map(t=>t.pw),backgroundColor:R.map((t,i)=>PALETTE[i%10]),borderRadius:6}]},options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{title:{display:true,text:'전력 지수'}}}}});}
+}
+let dataSortKey='pw',dataSortDir=-1;
+function buildDataOnce(){
+  if($('dataUpdated'))$('dataUpdated').textContent=DATA_META.season+' 시즌 · 기준일 '+DATA_META.updated+' ('+DATA_META.source+')';
+  renderDataTable();
+  if(!dataChart){const pts=KBO.map(t=>({x:t[1],y:t[2],name:t[0]}));dataChart=new Chart($('dataChart'),{type:'scatter',data:{datasets:[{data:pts,pointBackgroundColor:KBO.map((t,i)=>PALETTE[i%10]),pointRadius:8,pointHoverRadius:10}]},options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.name+' (OBP '+c.raw.x.toFixed(3).slice(1)+' / WHIP '+c.raw.y.toFixed(2)+')'}}},scales:{x:{title:{display:true,text:'출루율 OBP (높을수록 우수) →'}},y:{reverse:true,title:{display:true,text:'WHIP (낮을수록 우수) ↑'}}}}});}
+}
+function renderDataTable(){
+  const R=KBO.map(t=>({name:t[0],obp:t[1],whip:t[2],pw:powerIndex(t[1],t[2])}));
+  R.sort((a,b)=>(a[dataSortKey]>b[dataSortKey]?1:-1)*dataSortDir);
+  $('dataBody').innerHTML=R.map(t=>`<tr><td><b>${t.name}</b></td><td>${t.obp.toFixed(3).slice(1)}</td><td>${t.whip.toFixed(2)}</td><td><b>${t.pw}</b></td></tr>`).join('');
+}
+function bindDataSort(){document.querySelectorAll('#dataTable th[data-k]').forEach(th=>th.addEventListener('click',()=>{const k=th.dataset.k;if(dataSortKey===k)dataSortDir*=-1;else{dataSortKey=k;dataSortDir=k==='name'?1:-1;}renderDataTable();}));}
+
+let simReady=false;
+function showView(name){
+  const views=['dashboard','simulator','data','api','profile'];
+  if(!views.includes(name))name='dashboard';
+  views.forEach(v=>{const el=$('view-'+v);if(el)el.classList.toggle('active',v===name);});
+  document.querySelectorAll('[data-view]').forEach(a=>a.classList.toggle('active',a.dataset.view===name));
+  if(name==='simulator'){if(!simReady){initCharts();simReady=true;}render();}
+  if(name==='dashboard')buildDashboardOnce();
+  if(name==='data')buildDataOnce();
+  if(location.hash!=='#'+name)history.replaceState(null,'','#'+name);
+  window.scrollTo(0,0);
+}
+function start(){
+  fillSel($('loadA'),KBO[0][0]);fillSel($('loadB'),KBO[1][0]);
+  applyTeam('A',KBO[0][0]);applyTeam('B',KBO[1][0]);drawMix();bindDataSort();
+  document.querySelectorAll('[data-view]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();showView(a.dataset.view);}));
+  const init=(location.hash||'#dashboard').slice(1);
+  showView(init);
+}
+async function loadData(){try{const res=await fetch('data.json',{cache:'no-store'});if(res.ok){const j=await res.json();if(j.teams&&j.teams.length){KBO=j.teams.map(t=>[t.name,+t.obp,+t.whip]);DATA_META={season:j.season||'',updated:j.updated||'-',source:j.source||''};const info=$('dataInfo');if(info)info.textContent=(j.season?j.season+' · ':'')+'기준일 '+(j.updated||'-')+(j.source?' ('+j.source+')':'');}}}catch(e){}start();}
 loadData();
 </script>
 </body>
