@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WinProb · 야구 승률 시뮬레이터</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6f8; --card:#ffffff; --ink:#1e293b; --grey:#64748b; --line:#e2e8f0;
+  --nav:#1e293b; --pri:#4f46e5; --pri-l:#eef0fd;
+  --a:#2563eb; --a-l:#dbeafe; --b:#e11d48; --b-l:#fee2e8;
+  --amber:#f59e0b; --purple:#7c3aed; --sky:#0ea5e9; --teal:#0d9488; --pos:#10b981;
+  --shadow:0 4px 14px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Malgun Gothic','맑은 고딕','Apple SD Gothic Neo',system-ui,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.nav{background:var(--nav);color:#fff;display:flex;align-items:center;gap:34px;padding:0 32px;height:62px;position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:21px}
+.ball{width:30px;height:30px;border-radius:50%;background:#fff;border:2px solid #93b4ed;position:relative}
+.ball:before,.ball:after{content:"";position:absolute;top:3px;bottom:3px;width:7px;border:1.5px solid var(--b);border-radius:50%}
+.ball:before{left:2px;border-right:none}.ball:after{right:2px;border-left:none}
+.brand small{font-weight:500;font-size:13px;color:#94a3b8;margin-left:2px}
+.menu{display:flex;gap:30px;font-size:15px;color:#a0acbe}
+.menu a{color:inherit;text-decoration:none;padding:4px 0;border-bottom:2px solid transparent}
+.menu a.active{color:#fff;border-color:var(--pri)}
+.user{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:15px;color:#d2d9e4}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--pri);display:grid;place-items:center;font-weight:700;color:#fff;font-size:14px}
+.wrap{max-width:1480px;margin:0 auto;padding:26px 32px 50px}
+.head{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+.head h1{font-size:30px;font-weight:800}
+.head p{color:var(--grey);font-size:15px;width:100%}
+.badge{margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--pri-l);color:var(--pri);
+  font-weight:700;font-size:14px;padding:9px 16px;border-radius:20px;border:1.5px solid var(--pri)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--pri);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.grid{display:grid;grid-template-columns:380px 1fr;gap:22px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px}
+.card h3{font-size:18px;font-weight:800;display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.tag{width:9px;height:26px;border-radius:5px;display:inline-block}
+.row{display:grid;gap:18px}
+.r3{grid-template-columns:repeat(3,1fr)}
+.r2{grid-template-columns:1.6fr 1fr}
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.r3,.r2{grid-template-columns:1fr}}
+/* panel controls */
+.teamsel{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.chip{flex:1;display:flex;align-items:center;gap:9px;border-radius:13px;padding:11px 12px;font-weight:700;cursor:pointer;border:2px solid}
+.chip .b{width:18px;height:18px;border-radius:50%}
+.chip.a{background:var(--a-l);border-color:var(--a);color:var(--a)}
+.chip.a .b{background:var(--a)}
+.chip.b{background:var(--b-l);border-color:var(--b);color:var(--b)}
+.chip.b .b{background:var(--b)}
+.chip input{border:none;background:transparent;font:inherit;color:inherit;width:100%;outline:none}
+.vs{font-weight:800;color:var(--grey)}
+.sel{flex:1;padding:10px;border:1.5px solid var(--line);border-radius:11px;font:inherit;font-weight:600;color:var(--ink);background:#fff;cursor:pointer}
+.sel.a{border-color:var(--a);color:var(--a)} .sel.b{border-color:var(--b);color:var(--b)}
+.field{margin:16px 0}
+.field>label{display:block;font-weight:700;font-size:14px;margin-bottom:8px}
+.seg{display:flex;background:#f1f3f7;border:1.5px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:none;background:transparent;padding:9px 0;border-radius:9px;font:inherit;font-weight:600;color:var(--grey);cursor:pointer;font-size:14px}
+.seg button.on{color:#fff;font-weight:700}
+.seg.a button.on{background:var(--a)} .seg.p button.on{background:var(--pri)}
+.slider{display:flex;align-items:center;gap:12px}
+.slider input[type=range]{flex:1;accent-color:var(--pri)}
+.slider .val{font-weight:800;min-width:54px;text-align:right;font-variant-numeric:tabular-nums}
+.slider.a input{accent-color:var(--a)} .slider.a .val{color:var(--a)}
+.slider.b input{accent-color:var(--b)} .slider.b .val{color:var(--b)}
+.mixbar{height:14px;border-radius:7px;overflow:hidden;display:flex;margin-top:8px;border:1px solid var(--line)}
+.mixbar i{display:block;height:100%}
+.run{width:100%;margin-top:8px;background:var(--pri);color:#fff;border:none;border-radius:14px;padding:16px;font:inherit;font-weight:800;font-size:17px;cursor:pointer;transition:.15s}
+.run:hover{background:#4338ca}.run:active{transform:scale(.99)}
+.muted{color:var(--grey);font-size:13px}
+/* results */
+.donutWrap{position:relative;height:170px}
+.donutCtr{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.donutCtr .big{font-size:42px;font-weight:800;line-height:1;color:var(--a)}
+.donutCtr small{color:var(--grey);font-size:13px}
+.legend{display:flex;justify-content:space-between;margin-top:10px;font-weight:700;font-size:14px}
+.legend .la{color:var(--a)} .legend .lb{color:var(--b)}
+.score{text-align:center;padding:14px 0}
+.score .nums{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums}
+.score .nums .a{color:var(--a)} .score .nums .b{color:var(--b)} .score .nums .c{color:var(--grey);font-weight:600;margin:0 10px}
+.pill{margin-top:10px;background:var(--pri-l);color:var(--pri);font-weight:700;border-radius:11px;padding:9px;text-align:center;font-size:14px}
+.met{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
+.met:last-child{border:none}.met .k{color:var(--grey)}.met .v{font-weight:800}
+.zone{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;aspect-ratio:1;max-width:230px;margin:6px auto 0;
+  padding:14px;border:2px solid var(--ink);border-radius:8px;background:#fafafa}
+.zone i{border-radius:3px}
+.aiCard{background:var(--nav);color:#fff;border:none}
+.aiCard h3{color:var(--amber)}
+.aiCard .win{font-size:30px;font-weight:800;margin:4px 0}
+.aiCard .sub{color:#9aa6ba;font-size:14px}
+.aiMet{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid #334155;font-size:14px;color:#aab4c6}
+.aiMet b{font-weight:800}
+.foot{max-width:1480px;margin:0 auto;padding:18px 32px 40px;color:var(--grey);font-size:13px}
+canvas{max-width:100%}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="brand"><span class="ball"></span>WinProb <small>by NAVER Cloud</small></div>
+  <div class="menu"><a>대시보드</a><a class="active">시뮬레이터</a><a>데이터</a><a>API 문서</a></div>
+  <div class="user"><span class="avatar">재</span>김재일 ▾</div>
+</nav>
+
+<div class="wrap">
+  <div class="head">
+    <h1>경기 승률 시뮬레이터</h1>
+    <div class="badge"><span class="dot"></span>실시간 분석</div>
+    <p>타자·투수 세부 변수를 설정하고 시뮬레이션을 실행해 실시간 승률을 확인하세요. 모든 계산은 브라우저에서 몬테카를로 시뮬레이션으로 즉시 수행됩니다.</p>
+  </div>
+
+  <div class="grid">
+    <!-- ============ CONTROL PANEL ============ -->
+    <aside class="card">
+      <h3><span class="tag" style="background:var(--pri)"></span>경기 변수 설정</h3>
+      <div class="teamsel">
+        <label class="chip a"><span class="b"></span><input id="nameA" value="두산 베어스"></label>
+        <span class="vs">VS</span>
+        <label class="chip b"><span class="b"></span><input id="nameB" value="LG 트윈스"></label>
+      </div>
+
+      <div class="field">
+        <label>KBO 팀 데이터 불러오기 <span class="muted">(2025 시즌 기준 · 수정 가능)</span></label>
+        <div style="display:flex;gap:8px">
+          <select id="loadA" class="sel a"></select>
+          <select id="loadB" class="sel b"></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>타자 유형 — A팀 (좌/우)</label>
+        <div class="seg a" id="hand">
+          <button data-v="L">좌타</button><button data-v="R" class="on">우타</button><button data-v="S">스위치</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>투수 투구폼 — B팀</label>
+        <div class="seg p" id="form">
+          <button data-v="over">오버핸드</button><button data-v="three" class="on">스리쿼터</button><button data-v="side">사이드암</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>직구 구사율 — B팀 투수 <span class="muted" id="fbLbl">45%</span></label>
+        <div class="slider"><input id="fastball" type="range" min="30" max="60" value="45"></div>
+        <div class="mixbar" id="mixbar"></div>
+        <div class="muted" style="margin-top:6px">직구 비중이 높을수록 장타 허용이 늘어납니다</div>
+      </div>
+
+      <div class="field">
+        <label>A팀 공격 — 출루율(OBP) <span class="muted">vs B 투수</span></label>
+        <div class="slider a"><input id="aObp" type="range" min="280" max="400" value="360"><span class="val" id="aObpV">.360</span></div>
+      </div>
+      <div class="field">
+        <label>B팀 투수 — WHIP <span class="muted">낮을수록 우수</span></label>
+        <div class="slider b"><input id="bWhip" type="range" min="100" max="170" value="145"><span class="val" id="bWhipV">1.45</span></div>
+      </div>
+      <div class="field">
+        <label>B팀 공격 — 출루율(OBP) <span class="muted">vs A 투수</span></label>
+        <div class="slider b"><input id="bObp" type="range" min="280" max="400" value="320"><span class="val" id="bObpV">.320</span></div>
+      </div>
+      <div class="field">
+        <label>A팀 투수 — WHIP <span class="muted">낮을수록 우수</span></label>
+        <div class="slider a"><input id="aWhip" type="range" min="100" max="170" value="120"><span class="val" id="aWhipV">1.20</span></div>
+      </div>
+
+      <button class="run" id="run">▶  시뮬레이션 실행</button>
+      <div class="muted" style="text-align:center;margin-top:10px" id="simInfo">3,000회 시뮬레이션</div>
+    </aside>
+
+    <!-- ============ RESULTS ============ -->
+    <section class="row" style="grid-template-columns:1fr">
+      <div class="row r3">
+        <div class="card">
+          <h3><span class="tag" style="background:var(--a)"></span>승리 확률</h3>
+          <div class="donutWrap"><canvas id="donut"></canvas>
+            <div class="donutCtr"><div><div class="big" id="winBig">74%</div><small id="winSub">두산 우세</small></div></div>
+          </div>
+          <div class="legend"><span class="la" id="legA">● 두산 74%</span><span class="lb" id="legB">● LG 26%</span></div>
+        </div>
+        <div class="card">
+          <h3><span class="tag" style="background:var(--pri)"></span>예상 스코어</h3>
+          <div class="score">
+            <div class="nums"><span class="a" id="scoreA">5.9</span><span class="c">:</span><span class="b" id="scoreB">3.0</span></div>
+            <div class="muted" style="margin-top:6px">시뮬레이션 평균 득점</div>
+            <div class="pill" id="scorePill">두산 우세 · 득점차 +2.9</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3><span class="tag" style="background:var(--amber)"></span>핵심 지표 비교</h3>
+          <div id="mets"></div>
+        </div>
+      </div>
+
+      <div class="row r2">
+        <div class="card">
+          <h3><span class="tag" style="background:var(--a)"></span>이닝별 승리 확률 변화</h3>
+          <canvas id="inning" height="150"></canvas>
+        </div>
+        <div class="card">
+          <h3><span class="tag" style="background:var(--b)"></span>투구 로케이션</h3>
+          <div class="zone" id="zone"></div>
+          <div class="muted" style="text-align:center;margin-top:8px">진한 영역일수록 피안타 집중</div>
+        </div>
+      </div>
+
+      <div class="row r2">
+        <div class="card">
+          <h3><span class="tag" style="background:var(--purple)"></span>득점차 분포</h3>
+          <canvas id="hist" height="150"></canvas>
+          <div class="muted" style="margin-top:6px">주황 기준선(0점) 오른쪽일수록 A팀 승리</div>
+        </div>
+        <div class="card aiCard">
+          <h3>AI 추천 결과</h3>
+          <div class="win" id="aiWin">두산 베어스</div>
+          <div class="sub">승리 예상</div>
+          <div style="margin-top:14px">
+            <div class="aiMet"><span>예상 승률</span><b id="aiWp" style="color:var(--pos)">74.0%</b></div>
+            <div class="aiMet"><span>기대 득점차</span><b id="aiDiff" style="color:var(--sky)">+2.9</b></div>
+            <div class="aiMet"><span>매치업 출루확률</span><b id="aiP" style="color:var(--amber)">.318</b></div>
+          </div>
+          <div class="muted" style="color:#8294ad;margin-top:14px">클라우드 기반 실시간 추론 엔진 · 데모</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="foot">
+  본 시뮬레이터는 세이버메트릭스 기반 데모입니다. 승률은 odds-ratio 매치업 확률 → 이벤트 기반 몬테카를로 이닝 시뮬레이션 → 경기 승률의 3단계 알고리즘으로 산출됩니다. ⓒ 2026 트윈스 · 김재일
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+// KBO 10개 팀: [팀명, 팀 출루율(OBP), 팀 투수 WHIP]  — 2025 시즌 기준 샘플값(Statiz 수치로 갱신 가능)
+const KBO=[
+  ['두산',.355,1.38],['LG',.360,1.30],['KIA',.365,1.34],['삼성',.350,1.40],['SSG',.345,1.42],
+  ['롯데',.348,1.45],['한화',.352,1.36],['NC',.344,1.44],['KT',.346,1.41],['키움',.335,1.50]
+];
+const LEAGUE_OBP=0.335, K=1.10;
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const whipToObp=w=>w/(w+3);
+function matchup(a,b){a=clamp(a,.001,.999);b=clamp(b,.001,.999);const l=LEAGUE_OBP;
+  const n=a*b/l;return n/(n+(1-a)*(1-b)/(1-l));}
+const ADV={s2:.55,s1:.5,d1:.45};
+
+function simInning(p,mix){
+  let b1=0,b2=0,b3=0,outs=0,runs=0;
+  const cw=mix.walk,cs=cw+mix.single,cd=cs+mix.double,ct=cd+mix.triple;
+  while(outs<3){
+    if(Math.random()<p){
+      const v=Math.random(),g=Math.random();
+      if(v>=ct){runs+=b1+b2+b3+1;b1=b2=b3=0;}                       // HR
+      else if(v>=cd){runs+=b1+b2+b3;b3=1;b2=0;b1=0;}               // triple
+      else if(v>=cs){const d1=b1&&g<ADV.d1;runs+=b2+b3+(d1?1:0);   // double
+        b3=(b1&&!d1)?1:0;b2=1;b1=0;}
+      else if(v>=cw){const s2=b2&&g<ADV.s2;runs+=b3+(s2?1:0);      // single
+        const ob1=b1,ob2=b2;const nb3=(ob1&&g<ADV.s1)?1:((ob2&&!s2)?1:0);
+        const nb2=(ob1&&!(g<ADV.s1))?1:0;b3=nb3;b2=nb2;b1=1;}
+      else{if(b1&&b2&&b3)runs++;else if(b1&&b2)b3=1;else if(b1)b2=1;b1=1;} // walk
+    }else outs++;
+  }
+  return runs;
+}
+// event mix as fractions of on-base; fastball% nudges HR/double
+function makeMix(fastball){
+  const f=(fastball-45)/100;            // -0.15 .. +0.15
+  let hr=0.04*(1+1.6*f), dbl=0.155*(1+0.6*f);
+  hr=clamp(hr,.02,.08);
+  const walk=0.30, single=0.49, triple=0.015;
+  const sum=walk+single+dbl+triple+hr;
+  return {walk:walk/sum,single:single/sum,double:dbl/sum,triple:triple/sum,hr:hr/sum};
+}
+// platoon: batter handedness vs pitcher form -> small OBP delta
+function platoon(hand,form){
+  if(hand==='S')return 0.008;
+  const table={over:{L:0.004,R:-0.004},three:{L:0,R:0},side:{L:0.012,R:-0.014}};
+  return table[form][hand]||0;
+}
+
+function simulate(cfg,n=3000){
+  const mixA=makeMix(cfg.fastball);          // A bats vs B pitching
+  const mixB=makeMix(45);                     // B bats vs A pitching (neutral)
+  const aObpEff=clamp(cfg.aObp+platoon(cfg.hand,cfg.form),.2,.5);
+  const pA=clamp(matchup(aObpEff,whipToObp(cfg.bWhip))*K,.02,.95);
+  const pB=clamp(matchup(cfg.bObp,whipToObp(cfg.aWhip))*K,.02,.95);
+  let winA=0,ties=0,sumA=0,sumB=0;const diffs=new Array(n);
+  const inningAhead=new Array(9).fill(0);
+  for(let i=0;i<n;i++){
+    let ra=0,rb=0;
+    for(let inn=0;inn<9;inn++){
+      ra+=simInning(pA,mixA);rb+=simInning(pB,mixB);
+      if(ra>rb)inningAhead[inn]++;else if(ra===rb)inningAhead[inn]+=0.5;
+    }
+    sumA+=ra;sumB+=rb;diffs[i]=ra-rb;
+    if(ra>rb)winA++;else if(ra===rb)ties++;
+  }
+  return{
+    winA:(winA+ties*0.5)/n, meanA:sumA/n, meanB:sumB/n, diffs,
+    inningWP:inningAhead.map(c=>c/n), pA, pB
+  };
+}
+
+/* ---------- UI state ---------- */
+const state={hand:'R',form:'three',fastball:45,aObp:.360,bWhip:1.45,bObp:.320,aWhip:1.20};
+function seg(id,key){const el=$(id);el.addEventListener('click',e=>{
+  const btn=e.target.closest('button');if(!btn)return;
+  [...el.children].forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  state[key]=btn.dataset.v;});}
+seg('hand','hand');seg('form','form');
+// ----- KBO 팀 데이터 연동 -----
+function fillSel(sel,def){KBO.forEach(t=>{const o=document.createElement('option');o.value=t[0];o.textContent=t[0]+' ('+t[1].toFixed(3).slice(1)+' / '+t[2].toFixed(2)+')';if(t[0]===def)o.selected=true;sel.appendChild(o);});}
+function setS(id,key,val,div,fmt){const el=$(id);if(el){el.value=Math.round(val*div);}state[key]=val;const lab=$(id+'V');if(lab)lab.textContent=fmt(val);}
+function applyTeam(side,name){const t=KBO.find(x=>x[0]===name);if(!t)return;
+  if(side==='A'){$('nameA').value=t[0];setS('aObp','aObp',t[1],1000,v=>v.toFixed(3).slice(1));setS('aWhip','aWhip',t[2],100,v=>v.toFixed(2));}
+  else{$('nameB').value=t[0];setS('bObp','bObp',t[1],1000,v=>v.toFixed(3).slice(1));setS('bWhip','bWhip',t[2],100,v=>v.toFixed(2));}}
+fillSel($('loadA'),'두산');fillSel($('loadB'),'LG');
+$('loadA').addEventListener('change',e=>{applyTeam('A',e.target.value);render();});
+$('loadB').addEventListener('change',e=>{applyTeam('B',e.target.value);render();});
+function bindSlider(id,key,fmt,div){$(id).addEventListener('input',e=>{
+  const raw=+e.target.value;state[key]=div?raw/div:raw;$(id+'V')&&($(id+'V').textContent=fmt(state[key]));
+  if(id==='fastball')drawMix();});}
+bindSlider('aObp','aObp',v=>v.toFixed(3).slice(1),1000);
+bindSlider('bWhip','bWhip',v=>v.toFixed(2),100);
+bindSlider('bObp','bObp',v=>v.toFixed(3).slice(1),1000);
+bindSlider('aWhip','aWhip',v=>v.toFixed(2),100);
+$('fastball').addEventListener('input',e=>{state.fastball=+e.target.value;$('fbLbl').textContent=state.fastball+'%';drawMix();});
+
+const PITCH=[['직구','var(--b)'],['슬라이더','var(--a)'],['커브','var(--purple)'],['체인지업','var(--amber)'],['포크','var(--sky)']];
+function drawMix(){
+  const fb=state.fastball,rest=100-fb,parts=[fb,rest*0.42,rest*0.26,rest*0.20,rest*0.12];
+  $('mixbar').innerHTML=PITCH.map((p,i)=>`<i style="width:${parts[i]}%;background:${p[1]}"></i>`).join('');
+}
+
+/* ---------- charts ---------- */
+let donutC,inningC,histC;
+function initCharts(){
+  donutC=new Chart($('donut'),{type:'doughnut',data:{labels:['A','B'],
+    datasets:[{data:[74,26],backgroundColor:['#2563eb','#fbc9d4'],borderWidth:3,borderColor:'#fff'}]},
+    options:{cutout:'66%',plugins:{legend:{display:false},tooltip:{enabled:false}}}});
+  inningC=new Chart($('inning'),{type:'line',
+    data:{labels:['시작','1','2','3','4','5','6','7','8','9'],datasets:[
+      {label:'A',data:[],borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.1)',fill:true,tension:.35,borderWidth:3,pointRadius:3},
+      {label:'B',data:[],borderColor:'#e11d48',tension:.35,borderWidth:2,pointRadius:2}]},
+    options:{plugins:{legend:{display:false}},scales:{y:{min:.2,max:.85,ticks:{callback:v=>Math.round(v*100)+'%'}}}}});
+  histC=new Chart($('hist'),{type:'bar',data:{labels:[],datasets:[{data:[],backgroundColor:'#4f46e5'}]},
+    options:{plugins:{legend:{display:false}},scales:{x:{ticks:{maxTicksLimit:12}},y:{display:false}}}});
+}
+function histogram(diffs){
+  const lo=-15,hi=22,bins={};for(let x=lo;x<=hi;x++)bins[x]=0;
+  diffs.forEach(d=>{const c=clamp(Math.round(d),lo,hi);bins[c]++;});
+  const labels=[],data=[];for(let x=lo;x<=hi;x++){labels.push(x);data.push(bins[x]);}
+  return{labels,data};
+}
+function drawZone(){
+  const cells=[];for(let r=0;r<5;r++)for(let c=0;c<5;c++){
+    const v=Math.exp(-((c-1.7)**2+(r-3.0)**2)/3.2)+0.25*Math.random();
+    cells.push(v);}
+  const mx=Math.max(...cells);
+  $('zone').innerHTML=cells.map(v=>{const t=v/mx;
+    const col=`rgba(${Math.round(255)},${Math.round(220-150*t)},${Math.round(120-110*t)},${0.25+0.75*t})`;
+    return `<i style="background:${col}"></i>`;}).join('');
+}
+
+/* ---------- render ---------- */
+function render(){
+  $('run').textContent='⏳ 계산 중...';
+  setTimeout(()=>{
+    const r=simulate(state,3000);
+    const nameA=$('nameA').value||'A팀', nameB=$('nameB').value||'B팀';
+    const wA=r.winA*100, wB=100-wA, lead=wA>=50;
+    const leadName=lead?nameA:nameB, leadCol=lead?'var(--a)':'var(--b)';
+    // donut
+    donutC.data.datasets[0].data=[wA,wB];
+    donutC.data.datasets[0].backgroundColor=lead?['#2563eb','#fbc9d4']:['#dbe4f5','#e11d48'];
+    donutC.update();
+    $('winBig').textContent=Math.round(Math.max(wA,wB))+'%';
+    $('winBig').style.color=leadCol;
+    $('winSub').textContent=leadName+' 우세';
+    $('legA').textContent=`● ${nameA} ${wA.toFixed(0)}%`;
+    $('legB').textContent=`● ${nameB} ${wB.toFixed(0)}%`;
+    // score
+    $('scoreA').textContent=r.meanA.toFixed(1);$('scoreB').textContent=r.meanB.toFixed(1);
+    const diff=(r.meanA-r.meanB);
+    $('scorePill').textContent=`${leadName} 우세 · 득점차 ${diff>=0?'+':''}${diff.toFixed(1)}`;
+    // metrics
+    const obpDiff=state.aObp-state.bObp, whipDiff=state.bWhip-state.aWhip;
+    $('mets').innerHTML=[
+      ['출루율 차이',(obpDiff>=0?'+':'')+obpDiff.toFixed(3),obpDiff>=0?'var(--a)':'var(--b)'],
+      ['WHIP 차이',(whipDiff>=0?'A 우위':'B 우위'),whipDiff>=0?'var(--a)':'var(--b)'],
+      ['기대 득점차',(diff>=0?'+':'')+diff.toFixed(1),'var(--pri)'],
+      ['매치업 출루확률','.'+Math.round(r.pA*1000),'var(--teal)']
+    ].map(m=>`<div class="met"><span class="k">${m[0]}</span><span class="v" style="color:${m[2]}">${m[1]}</span></div>`).join('');
+    // inning chart
+    inningC.data.datasets[0].data=[0.5,...r.inningWP];
+    inningC.data.datasets[1].data=[0.5,...r.inningWP.map(v=>1-v)];
+    inningC.update();
+    // histogram
+    const h=histogram(r.diffs);histC.data.labels=h.labels;histC.data.datasets[0].data=h.data;histC.update();
+    // zone
+    drawZone();
+    // ai card
+    $('aiWin').textContent=leadName;
+    $('aiWp').textContent=Math.max(wA,wB).toFixed(1)+'%';
+    $('aiDiff').textContent=(diff>=0?'+':'')+diff.toFixed(1);
+    $('aiP').textContent='.'+Math.round(r.pA*1000);
+    $('run').textContent='▶  시뮬레이션 실행';
+  },30);
+}
+$('run').addEventListener('click',render);
+
+/* init */
+initCharts();drawMix();applyTeam('A','두산');applyTeam('B','LG');render();
+</script>
+</body>
+</html>
